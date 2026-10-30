@@ -23,12 +23,22 @@ if (process.env.NODE_ENV !== 'test') {
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const locationRoutes = require('./routes/locationRoutes');
+const trafficRoutes = require('./routes/trafficRoutes');
+const signalRoutes = require('./routes/signalRoutes');
+const incidentRoutes = require('./routes/incidentRoutes');
+const alertRoutes = require('./routes/alertRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
 
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/locations', locationRoutes);
+app.use('/api/traffic', trafficRoutes);
+app.use('/api/signals', signalRoutes);
+app.use('/api/incidents', incidentRoutes);
+app.use('/api/alerts', alertRoutes);
+app.use('/api/reports', reportRoutes);
 app.use('/api/settings', settingsRoutes);
 
 // Health check endpoint
