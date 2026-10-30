@@ -21,9 +21,15 @@ if (process.env.NODE_ENV !== 'test') {
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const locationRoutes = require('./routes/locationRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
 
 // Mount routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/locations', locationRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

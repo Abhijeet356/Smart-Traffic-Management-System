@@ -56,7 +56,6 @@ const locationSchema = new mongoose.Schema(
   }
 );
 
-locationSchema.index({ code: 1 });
 locationSchema.index({ 'coordinates.latitude': 1, 'coordinates.longitude': 1 });
 
 module.exports = mongoose.model('Location', locationSchema);
