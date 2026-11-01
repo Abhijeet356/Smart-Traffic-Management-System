@@ -15,7 +15,7 @@ const registerValidator = [
     .withMessage('Email is required')
     .isEmail()
     .withMessage('Please provide a valid email address')
-    .normalizeEmail(),
+    .normalizeEmail({ gmail_remove_dots: false, gmail_remove_subaddress: false }),
 
   check('password')
     .notEmpty()
@@ -42,7 +42,7 @@ const loginValidator = [
     .withMessage('Email is required')
     .isEmail()
     .withMessage('Please provide a valid email address')
-    .normalizeEmail(),
+    .normalizeEmail({ gmail_remove_dots: false, gmail_remove_subaddress: false }),
 
   check('password')
     .notEmpty()

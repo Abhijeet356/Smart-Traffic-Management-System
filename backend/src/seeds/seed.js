@@ -59,6 +59,14 @@ const seedDatabase = async (shouldDisconnect = false) => {
       contactNumber: '+91 99887 76655',
     });
 
+    await User.create({
+      name: 'Public Citizen',
+      email: 'citizen@traffic.gov',
+      password: 'Password123!',
+      role: ROLES.CITIZEN,
+      contactNumber: '+91 99887 00000',
+    });
+
     // 3. Seed Realistic Monitored Intersections (Delhi Urban Grid)
     const locationsData = [
       {
