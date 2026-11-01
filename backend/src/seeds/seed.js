@@ -7,20 +7,23 @@ const TrafficSignal = require('../models/TrafficSignal');
 const SystemSettings = require('../models/SystemSettings');
 const { ROLES, SIGNAL_MODES, SIGNAL_PHASES } = require('../config/constants');
 
-const seedData = async () => {
+const seedDatabase = async (shouldDisconnect = false) => {
   try {
-    console.log('[Seed] Connecting to database...');
-    await connectDB();
+    // Check if users already exist to avoid unnecessary wipe if running on live MongoDB
+    const existingCount = await User.countDocuments();
+    if (existingCount > 0 && !shouldDisconnect) {
+      console.log('[Seed] Database already contains data. Skipping auto-seed.');
+      return;
+    }
 
-    console.log('[Seed] Clearing existing initial collections...');
+    console.log('[Seed] Populating initial collections...');
     await User.deleteMany({});
     await Location.deleteMany({});
     await TrafficSignal.deleteMany({});
     await SystemSettings.deleteMany({});
 
     // 1. Seed Default System Settings
-    console.log('[Seed] Creating default System Settings...');
-    const settings = await SystemSettings.create({
+    await SystemSettings.create({
       lowDensityMax: 30,
       mediumDensityMax: 60,
       highDensityMax: 80,
@@ -31,8 +34,7 @@ const seedData = async () => {
     });
 
     // 2. Seed Users
-    console.log('[Seed] Creating role-based accounts (Admin, Police, Citizen)...');
-    const adminUser = await User.create({
+    await User.create({
       name: 'System Administrator',
       email: 'admin@traffic.gov',
       password: 'Password123!',
@@ -40,7 +42,7 @@ const seedData = async () => {
       contactNumber: '+91 98765 43210',
     });
 
-    const policeUser = await User.create({
+    await User.create({
       name: 'Inspector Rajesh Sharma',
       email: 'officer.sharma@traffic.gov',
       password: 'Password123!',
@@ -49,7 +51,7 @@ const seedData = async () => {
       contactNumber: '+91 98111 22334',
     });
 
-    const citizenUser = await User.create({
+    await User.create({
       name: 'Ananya Verma',
       email: 'ananya.citizen@gmail.com',
       password: 'Password123!',
@@ -58,7 +60,6 @@ const seedData = async () => {
     });
 
     // 3. Seed Realistic Monitored Intersections (Delhi Urban Grid)
-    console.log('[Seed] Creating monitored urban locations...');
     const locationsData = [
       {
         name: 'Connaught Place Radial Junction',
@@ -110,7 +111,6 @@ const seedData = async () => {
     const insertedLocations = await Location.insertMany(locationsData);
 
     // 4. Seed Traffic Signals for each location
-    console.log('[Seed] Initializing Traffic Signals with 4-phase directional arms...');
     const signalPromises = insertedLocations.map((loc) => {
       return TrafficSignal.create({
         locationId: loc._id,
@@ -160,23 +160,24 @@ const seedData = async () => {
 
     console.log('====================================================');
     console.log('✅ Demo Database Seed Completed Successfully!');
-    console.log('====================================================');
-    console.log('Demo Credentials:');
     console.log('👑 Admin:   admin@traffic.gov          / Password123!');
     console.log('👮 Police:  officer.sharma@traffic.gov / Password123!');
     console.log('🚗 Citizen: ananya.citizen@gmail.com   / Password123!');
     console.log('====================================================');
 
-    await disconnectDB();
-    process.exit(0);
+    if (shouldDisconnect) {
+      await disconnectDB();
+      process.exit(0);
+    }
   } catch (error) {
     console.error('Seed Error:', error);
-    process.exit(1);
+    if (shouldDisconnect) process.exit(1);
+    throw error;
   }
 };
 
 if (require.main === module) {
-  seedData();
+  connectDB().then(() => seedDatabase(true));
 }
 
-module.exports = seedData;
+module.exports = { seedDatabase };
