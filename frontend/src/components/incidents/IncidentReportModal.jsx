@@ -1,50 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { AlertTriangle, X, Check } from 'lucide-react';
 
 export default function IncidentReportModal({ isOpen, onClose, locations = [], onIncidentReported }) {
-  if (!isOpen) return null;
+  // Normalize locations whether raw array of locations or array of { location, telemetry, signal }
+  const normalizedLocations = locations
+    .map((loc) => loc?.location || loc)
+    .filter((loc) => loc && loc._id);
 
-  const [locationId, setLocationId] = useState(locations[0]?._id || '');
+  const [locationId, setLocationId] = useState('');
   const [type, setType] = useState('accident');
   const [severity, setSeverity] = useState('medium');
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
+  // Sync selected location ID when locations are loaded or modal opens
+  useEffect(() => {
+    if (normalizedLocations.length > 0 && !locationId) {
+      setLocationId(normalizedLocations[0]._id);
+    }
+  }, [normalizedLocations, locationId]);
+
+  if (!isOpen) return null;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+
+    const targetLocationId = locationId || normalizedLocations[0]?._id;
+    if (!targetLocationId) {
+      setError('Please select an intersection or monitored location.');
+      return;
+    }
+
     if (!description.trim()) {
       setError('Please provide a description of the incident.');
       return;
     }
 
     setSubmitting(true);
-    setError(null);
     try {
       const res = await api.post('/incidents', {
-        locationId: locationId || locations[0]?._id,
+        locationId: targetLocationId,
         type,
         severity,
-        description,
+        description: description.trim(),
       });
 
       if (res.success) {
+        // Reset form
+        setDescription('');
+        setType('accident');
+        setSeverity('medium');
         if (onIncidentReported) onIncidentReported(res.incident);
         onClose();
       }
     } catch (err) {
+      console.error('[Incident Submit Error]', err);
       setError(err.message || 'Failed to submit incident report');
     } finally {
       setSubmitting(false);
     }
   };
 
+  const handleClose = () => {
+    setError(null);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150">
       <div className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-6 relative">
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
         >
           <X className="w-5 h-5" />
@@ -76,18 +105,15 @@ export default function IncidentReportModal({ isOpen, onClose, locations = [], o
               Select Intersection / Location
             </label>
             <select
-              value={locationId}
+              value={locationId || normalizedLocations[0]?._id || ''}
               onChange={(e) => setLocationId(e.target.value)}
               className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none"
             >
-              {locations.map((loc) => {
-                const item = loc.location || loc;
-                return (
-                  <option key={item._id} value={item._id}>
-                    {item.name} ({item.code})
-                  </option>
-                );
-              })}
+              {normalizedLocations.map((item) => (
+                <option key={item._id} value={item._id}>
+                  {item.name} ({item.code})
+                </option>
+              ))}
             </select>
           </div>
 
@@ -142,7 +168,7 @@ export default function IncidentReportModal({ isOpen, onClose, locations = [], o
           <div className="pt-2 flex items-center justify-end gap-3">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold"
             >
               Cancel
