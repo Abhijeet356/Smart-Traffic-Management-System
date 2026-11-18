@@ -98,6 +98,6 @@ All **30 unit and integration tests** pass successfully covering health checks, 
 ---
 
 ## 👥 Authors
-- **Abhijeet** & Team
-- B.Tech Computer Science & Engineering Capstone Project
+- **Abhijeet and Ankita**
+- B.Tech Computer Science & Engineering Project
 - Repository: [Abhijeet356/Smart-Traffic-Management-System](https://github.com/Abhijeet356/Smart-Traffic-Management-System)
