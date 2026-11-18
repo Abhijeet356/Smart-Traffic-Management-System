@@ -1,3 +1,8 @@
+﻿const dns = require('dns');
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+} catch (e) {}
+
 const mongoose = require('mongoose');
 
 let memoryServerInstance = null;
@@ -10,9 +15,9 @@ const connectDB = async () => {
   const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/smart_traffic_db';
 
   try {
-    // Attempt standard connection first
+    // Attempt standard connection first with 8s timeout for cloud Atlas
     const conn = await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 2500, // Quick check
+      serverSelectionTimeoutMS: 8000,
     });
     console.log(`[MongoDB] Connected successfully to: ${conn.connection.host}`);
     return conn;

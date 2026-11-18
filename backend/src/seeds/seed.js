@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const mongoose = require('mongoose');
 const { connectDB, disconnectDB } = require('../config/db');
 const User = require('../models/User');
@@ -9,7 +9,6 @@ const { ROLES, SIGNAL_MODES, SIGNAL_PHASES } = require('../config/constants');
 
 const seedDatabase = async (shouldDisconnect = false) => {
   try {
-    // Check if users already exist to avoid unnecessary wipe if running on live MongoDB
     const existingCount = await User.countDocuments();
     if (existingCount > 0 && !shouldDisconnect) {
       console.log('[Seed] Database already contains data. Skipping auto-seed.');
@@ -47,7 +46,7 @@ const seedDatabase = async (shouldDisconnect = false) => {
       email: 'officer.sharma@traffic.gov',
       password: 'Password123!',
       role: ROLES.POLICE,
-      badgeNumber: 'TP-DELHI-809',
+      badgeNumber: 'TP-POLICE-101',
       contactNumber: '+91 98111 22334',
     });
 
@@ -67,11 +66,59 @@ const seedDatabase = async (shouldDisconnect = false) => {
       contactNumber: '+91 99887 00000',
     });
 
-    // 3. Seed Realistic Monitored Intersections (Delhi Urban Grid)
+    // 3. Seed Realistic Monitored Intersections (Patna & Delhi Urban Grids)
     const locationsData = [
+      // --- Patna, Bihar ---
+      {
+        name: 'Dak Bungalow Chowk',
+        code: 'PAT-101',
+        coordinates: { latitude: 25.6080, longitude: 85.1376 },
+        roadCapacity: 850,
+        speedLimit: 45,
+        roadType: 'intersection',
+        description: 'Central commercial intersection connecting Fraser Road & Bailey Road',
+      },
+      {
+        name: 'Gandhi Maidan Roundabout',
+        code: 'PAT-102',
+        coordinates: { latitude: 25.6186, longitude: 85.1458 },
+        roadCapacity: 950,
+        speedLimit: 50,
+        roadType: 'roundabout',
+        description: 'Major central transit roundabout and administrative corridor',
+      },
+      {
+        name: 'Boring Road Crossing',
+        code: 'PAT-103',
+        coordinates: { latitude: 25.6152, longitude: 85.1165 },
+        roadCapacity: 750,
+        speedLimit: 40,
+        roadType: 'intersection',
+        description: 'High student and commercial density intersection near Boring Canal Road',
+      },
+      {
+        name: 'Bailey Road Flyover Junction',
+        code: 'PAT-104',
+        coordinates: { latitude: 25.6120, longitude: 85.0850 },
+        roadCapacity: 1100,
+        speedLimit: 60,
+        roadType: 'expressway',
+        description: 'Major arterial corridor connecting Western Patna & Danapur',
+      },
+      {
+        name: 'Ashok Rajpath / NIT Patna Junction',
+        code: 'PAT-105',
+        coordinates: { latitude: 25.6207, longitude: 85.1728 },
+        roadCapacity: 700,
+        speedLimit: 40,
+        roadType: 'intersection',
+        description: 'Institutional transit gateway outside NIT Patna campus',
+      },
+
+      // --- Delhi NCR ---
       {
         name: 'Connaught Place Radial Junction',
-        code: 'INT-101',
+        code: 'DEL-101',
         coordinates: { latitude: 28.6315, longitude: 77.2167 },
         roadCapacity: 800,
         speedLimit: 50,
@@ -80,7 +127,7 @@ const seedDatabase = async (shouldDisconnect = false) => {
       },
       {
         name: 'AIIMS Ring Road Intersection',
-        code: 'INT-102',
+        code: 'DEL-102',
         coordinates: { latitude: 28.5672, longitude: 77.2100 },
         roadCapacity: 1000,
         speedLimit: 60,
@@ -89,7 +136,7 @@ const seedDatabase = async (shouldDisconnect = false) => {
       },
       {
         name: 'Nehru Place Outer Ring Flyover',
-        code: 'INT-103',
+        code: 'DEL-103',
         coordinates: { latitude: 28.5494, longitude: 77.2526 },
         roadCapacity: 900,
         speedLimit: 50,
@@ -98,7 +145,7 @@ const seedDatabase = async (shouldDisconnect = false) => {
       },
       {
         name: 'Cyber City Expressway Junction',
-        code: 'INT-104',
+        code: 'DEL-104',
         coordinates: { latitude: 28.4950, longitude: 77.0895 },
         roadCapacity: 1200,
         speedLimit: 70,
@@ -107,7 +154,7 @@ const seedDatabase = async (shouldDisconnect = false) => {
       },
       {
         name: 'India Gate C-Hexagon Corridor',
-        code: 'INT-105',
+        code: 'DEL-105',
         coordinates: { latitude: 28.6129, longitude: 77.2295 },
         roadCapacity: 750,
         speedLimit: 50,
