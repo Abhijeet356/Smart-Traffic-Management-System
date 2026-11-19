@@ -57,7 +57,7 @@ const AppLayout = ({ children }) => {
         </main>
       </div>
       <footer className="border-t border-slate-200 dark:border-slate-800 py-3 text-center text-[11px] text-slate-500 bg-white/40 dark:bg-slate-900/40">
-        Smart Traffic Management System &copy; 2026 — B.Tech Computer Science and Engineering Capstone Project
+        Smart Traffic Management System &copy; 2026 — B.Tech Computer Science and Engineering Project
       </footer>
     </div>
   );

@@ -9,11 +9,12 @@ export default function SignalsPage() {
   const { isPolice, isAdmin } = useAuth();
 
   const [signals, setSignals] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [overrideSignal, setOverrideSignal] = useState(null);
   const [notificationMsg, setNotificationMsg] = useState(null);
 
   const fetchSignals = async () => {
+    setLoading(true);
     try {
       const res = await api.get('/signals');
       if (res.success) {
@@ -22,7 +23,7 @@ export default function SignalsPage() {
     } catch (err) {
       console.error('Fetch signals error:', err);
     } finally {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 500);
     }
   };
 
@@ -33,15 +34,21 @@ export default function SignalsPage() {
   }, []);
 
   const handleOptimize = async (sig) => {
+    setLoading(true);
     try {
       const res = await api.post(`/signals/${sig._id}/optimize`);
       if (res.success) {
-        setNotificationMsg(`Dynamic Webster optimization applied to ${sig.intersectionName}`);
-        fetchSignals();
-        setTimeout(() => setNotificationMsg(null), 4000);
+        const splitsText = res.result?.allocations
+          ? res.result.allocations.map((a) => `${a.direction}: ${a.greenDuration}s`).join(' | ')
+          : '';
+        setNotificationMsg(`⚡ Webster Splits optimized for ${sig.intersectionName} (${splitsText})`);
+        await fetchSignals();
+        setTimeout(() => setNotificationMsg(null), 5000);
       }
     } catch (err) {
       console.error('Optimize error:', err);
+    } finally {
+      setTimeout(() => setLoading(false), 500);
     }
   };
 
@@ -62,10 +69,10 @@ export default function SignalsPage() {
         <button
           onClick={fetchSignals}
           disabled={loading}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold active:scale-95 transition-all shadow-sm disabled:opacity-50"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          <span>Refresh Signals</span>
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-500' : ''}`} />
+          <span>{loading ? 'Refreshing...' : 'Refresh Signals'}</span>
         </button>
       </div>
 
