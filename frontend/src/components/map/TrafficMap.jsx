@@ -83,7 +83,16 @@ export default function TrafficMap({ locations = [], onSelectLocation, initialCi
         </select>
 
         <span className="text-[11px] font-mono text-slate-500 border-l border-slate-300 dark:border-slate-700 pl-2">
-          {locations.length} Intersections Monitored
+          {(() => {
+            const count = locations.filter(loc => {
+              const c = (loc.city || '').toLowerCase();
+              const code = (loc.code || '').toLowerCase();
+              if (selectedCityKey === 'patna') return c.includes('patna') || code.startsWith('pat');
+              if (selectedCityKey === 'delhi') return c.includes('delhi') || code.startsWith('del');
+              return true;
+            }).length;
+            return count > 0 ? `${count} Intersections in ${activeCity.name.split(' ')[0]}` : `${locations.length} Total Intersections`;
+          })()}
         </span>
       </div>
 
