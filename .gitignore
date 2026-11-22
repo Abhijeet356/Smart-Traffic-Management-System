@@ -39,3 +39,4 @@ logs/
 # Temporary files
 scratch/
 tmp/
+*.bat

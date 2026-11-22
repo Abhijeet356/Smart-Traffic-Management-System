@@ -1,3 +1,5 @@
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -6,7 +8,13 @@ const morgan = require('morgan');
 const app = express();
 
 // Security and utility middlewares
-app.use(helmet());
+// Disable strict CSP in Helmet so OpenStreetMap tiles, Leaflet styles, and fonts load correctly
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -52,16 +60,30 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Root welcome endpoint
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Welcome to the Smart Traffic Management System API',
-    documentation: '/api/health'
+// Serve frontend static build in production (Unified Full-Stack deployment)
+const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
+if (fs.existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath));
+
+  // Client-side SPA routing fallback (exclude /api routes)
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
   });
-});
+} else {
+  // Root welcome endpoint (development mode without frontend build)
+  app.get('/', (req, res) => {
+    res.json({
+      message: 'Welcome to the Smart Traffic Management System API',
+      documentation: '/api/health'
+    });
+  });
+}
 
 // 404 handler for undefined API routes
-app.use((req, res, next) => {
+app.use('/api/*', (req, res) => {
   res.status(404).json({
     success: false,
     message: `Resource not found - ${req.originalUrl}`
